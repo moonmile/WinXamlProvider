@@ -18,6 +18,7 @@
         	FontSize="30"
         	Margin="47,161,0,0" TextWrapping="Wrap" Text="This is a message." VerticalAlignment="Top"/>
         <Button 
+            x:Name="btnClickMe"
             Content="Click Me" 
                 Click="Button_Click"
                 FontSize="30" HorizontalAlignment="Left" Margin="44,260,0,0" VerticalAlignment="Top"/>

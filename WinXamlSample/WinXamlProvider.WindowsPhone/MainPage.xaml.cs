@@ -28,9 +28,11 @@ namespace WinXamlProvider
 
             this.NavigationCacheMode = NavigationCacheMode.Required;
 
-            var pa = new Moonmile.WinXamlProvider.ParseXaml();
-            var bi = new WinXamlProvider.Lib.MainPage();
-            pa.Bind(this, bi);
+            var pa = new Moonmile.WinXamlProvider.WinRT.ParseXaml();
+            pa.InitBind(
+                this,
+                new WinXamlProvider.Lib.MainPage(),
+                new Uri("ms-appx:///Xaml/MainPage.xml"));
 
         }
 

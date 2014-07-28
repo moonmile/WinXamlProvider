@@ -16,6 +16,8 @@
     <SynthesizeLinkMetadata>true</SynthesizeLinkMetadata>
     <ProjectTypeGuids>{BC8A1FFA-BEE3-4634-8014-F334798102B3};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
     <PackageCertificateKeyFile>WinXamlProvider.Windows_TemporaryKey.pfx</PackageCertificateKeyFile>
+    <SolutionDir Condition="$(SolutionDir) == '' Or $(SolutionDir) == '*Undefined*'">..\..\</SolutionDir>
+    <RestorePackages>true</RestorePackages>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -104,17 +106,13 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- A reference to the entire .Net Framework and Windows SDK are automatically included -->
-    <ProjectReference Include="..\..\Prov.lib\Prov.lib.csproj">
-      <Project>{e92f9000-2fff-4e8c-b5fc-b5e24a7cf425}</Project>
-      <Name>Prov.lib</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Prov\Prov.csproj">
-      <Project>{39a24772-558a-4aba-9355-2c90378cc0eb}</Project>
-      <Name>Prov</Name>
-    </ProjectReference>
     <ProjectReference Include="..\..\WinXamlProvider.Lib\WinXamlProvider.Lib.fsproj">
       <Project>{906e7121-e056-4c9f-af97-7898a46f018b}</Project>
       <Name>WinXamlProvider.Lib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\WinXamlProvider.WinRT\WinXamlProvider.WinRT.csproj">
+      <Project>{5f438750-bbe7-4487-9623-c45a6a630a46}</Project>
+      <Name>WinXamlProvider.WinRT</Name>
     </ProjectReference>
     <ProjectReference Include="..\..\WinXamlProvider\WinXamlProvider.fsproj">
       <Project>{c84b7e49-f8d8-4128-ba1b-51863a1a8b6d}</Project>
@@ -141,16 +139,28 @@
     <Content Include="Assets\StoreLogo.scale-100.png" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Xaml\MainPage.xml">
+      <SubType>Designer</SubType>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
+  <ItemGroup />
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '12.0' ">
     <VisualStudioVersion>12.0</VisualStudioVersion>
   </PropertyGroup>
   <Import Project="..\WinXamlProvider.Shared\WinXamlProvider.Shared.projitems" Label="Shared" />
   <Import Project="$(MSBuildExtensionsPath)\Microsoft\WindowsXaml\v$(VisualStudioVersion)\Microsoft.Windows.UI.Xaml.CSharp.targets" />
+  <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>このプロジェクトは、このコンピューターにはない NuGet パッケージを参照しています。これらをダウンロードするには、NuGet パッケージの復元を有効にしてください。詳細については、http://go.microsoft.com/fwlink/?LinkID=322105 を参照してください。不足しているファイルは {0} です。</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('$(SolutionDir)\.nuget\NuGet.targets')" Text="$([System.String]::Format('$(ErrorText)', '$(SolutionDir)\.nuget\NuGet.targets'))" />
+  </Target>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
   <Target Name="BeforeBuild">

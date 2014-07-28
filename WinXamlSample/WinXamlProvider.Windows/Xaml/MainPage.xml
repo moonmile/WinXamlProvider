@@ -5,21 +5,22 @@
     xmlns:local="using:WinXamlProvider"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    mc:Ignorable="d">
 
-    <Grid>
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <TextBlock HorizontalAlignment="Left" 
-                   FontSize="40"
+                   FontSize="80"
                    Margin="47,45,0,0" TextWrapping="Wrap" Text="WinXamlProvider Sample" VerticalAlignment="Top"/>
         <TextBlock 
             x:Name="textMessage"
             HorizontalAlignment="Left" 
-        	FontSize="30"
+        	FontSize="50"
         	Margin="47,161,0,0" TextWrapping="Wrap" Text="This is a message." VerticalAlignment="Top"/>
         <Button 
+            x:Name="btnClickMe"
             Content="Click Me" 
                 Click="Button_Click"
-                FontSize="30" HorizontalAlignment="Left" Margin="44,260,0,0" VerticalAlignment="Top"/>
+                FontSize="50" HorizontalAlignment="Left" Margin="44,260,0,0" VerticalAlignment="Top"/>
+
     </Grid>
 </Page>

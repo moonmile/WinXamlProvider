@@ -42,7 +42,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="WinXamlEnum.fs" />
+    <Compile Include="WinXamlStruct.fs" />
+    <Compile Include="BaseElement.fs" />
+    <Compile Include="WinXamlCore.fs" />
+    <Compile Include="WinXamlDocuments.fs" />
+    <Compile Include="WinXamlMedia.fs" />
+    <Compile Include="WinXamlUI.fs" />
+    <Compile Include="WinXamlControls.fs" />
     <Compile Include="UIElement.fs" />
+    <Compile Include="TextBlock.fs" />
+    <Compile Include="TextBox.fs" />
+    <Compile Include="Button.fs" />
     <Compile Include="ParseXaml.fs" />
   </ItemGroup>
   <PropertyGroup>

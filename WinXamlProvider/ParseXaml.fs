@@ -3,7 +3,9 @@ open System
 open System.Reflection
 open System.Runtime.CompilerServices
 open System.Runtime.InteropServices.WindowsRuntime
+open System.Linq
 open Moonmile.WinXamlProvider.UI
+
 
 type ParseXaml() = 
 
@@ -12,24 +14,15 @@ type ParseXaml() =
         let res = mi.Invoke( page, [|propName|])
         res
 
-    let bindProperty( page:obj, bind:obj, propName:string ) =
-        let pprop = findName( page, propName )
-        let bi = bind.GetType().GetRuntimeProperty(propName)
-        let elname = propName.Substring(propName.LastIndexOf(".")+1)
-        match elname with
-        | "TextBlock" -> bi.SetValue( bind, new TextBlock(target = pprop))
-        | "Button"    -> bi.SetValue( bind, new Button(target=pprop))
-        | _ -> bi.SetValue( bind, new UIElement( target=pprop )) 
-
     let bindMethod( page:obj, bind:obj, target:obj, eventName:string, methodName:string) =
         let ei = target.GetType().GetRuntimeEvent(eventName)
         let dt = ei.AddMethod.GetParameters().[0].ParameterType
-        let mi = bind.GetType().GetRuntimeMethod(methodName,[|typeof<obj>; typeof<EventArgs>|])
+        let mi = bind.GetType().GetRuntimeMethod(methodName,[|typeof<obj>; typeof<RoutedEventArgs>|])
 
         let handler = 
             new Action<obj,obj>( 
                 fun sender eventArgs ->
-                    let e = new EventArgs()
+                    let e = new RoutedEventArgs(eventArgs)
                     mi.Invoke( bind, [|sender; e|]) |> ignore ) 
         
 
@@ -41,33 +34,52 @@ type ParseXaml() =
                         ret :?> EventRegistrationToken  
                     )
         let remove = new Action<EventRegistrationToken>( fun(t) -> 
-                ei.RemoveMethod.Invoke( target, [|t|]) |> ignore 
-                ) 
+                ei.RemoveMethod.Invoke( target, [|t|]) |> ignore ) 
         WindowsRuntimeMarshal.AddEventHandler<Delegate>( add, remove, dele)
 
-(*
-        public void bindMethod(object page, object bind, object target, string eventName, string methodName)
-        {
-            var ei = target.GetType().GetRuntimeEvent(eventName);
-            var dt = ei.AddMethod.GetParameters()[0].ParameterType;
-            var mi = bind.GetType().GetRuntimeMethod(methodName, new Type[] { typeof(object), typeof(EventArgs) });
+    let bindProperty( page:obj, bind:obj, propName:string, t:Type ) =
+        let pprop = findName( page, propName )
+        if pprop <> null then 
+            let bi = bind.GetType().GetRuntimeProperty(propName)
 
-            Action<object, object> handler = (object sender, object eventArgs) =>
-                mi.Invoke(bind, new object[] { sender, eventArgs as EventArgs });
-            MethodInfo handlerInvoke = typeof(Action<object, object>).GetRuntimeMethod("Invoke", new Type[] { typeof(object), typeof(Type[]) });
-            Delegate dele = handlerInvoke.CreateDelegate(dt, handler);
+            match t.Name with
+            | "TextBlock" -> bi.SetValue( bind, new TextBlock(target = pprop))
+            | "TextBox" -> bi.SetValue( bind, new TextBox(target = pprop))
+            | "Button"    -> bi.SetValue( bind, new Button(target=pprop))
+            | _ -> bi.SetValue( bind, new UIElement( target=pprop )) 
 
-            Func<Delegate, EventRegistrationToken> add = (t) => (EventRegistrationToken)ei.AddMethod.Invoke(target, new object[] { t });
-            Action<EventRegistrationToken> remove = t => 
-                ei.RemoveMethod.Invoke(target, new object[] { t });
-            WindowsRuntimeMarshal.AddEventHandler<Delegate>(add, remove, dele);
-        }
-*)
-
+    /// <summary>
+    /// XAMLを別のコードビハイドクラスにバインドする
+    /// </summary>
+    /// <param name="page">バインド元のC#のMainPage</param>
+    /// <param name="bind">バインド先のF#のMainPage</param>
     member this.Bind(page:obj, bind:obj) =
-        bindProperty( page, bind, "textMessage" )
-        let btn = findName( page, "btnClickMe")
-        bindMethod( page, bind, btn, "Click", "Button_Click" )
+        // bind 先に公開してあるプロパティを検索して自動バインドする
+        // bindProperty( page, bind, "textMessage", typeof<TextBlock>)
+        let pis = bind.GetType().GetRuntimeProperties().ToList()
+        pis |> Seq.iter( fun(pi) -> 
+            bindProperty( page, bind, pi.Name, pi.GetMethod.ReturnType ))
 
+        // bind 先に公開してあるイベントメソッドを検索して自動バインドする
+        // 1.bind.Button_Click を検索
+        // 2.page.Button_Click を特定
+        // 3.Button.Click event を特定
+        // 4.page.btnClickMe を特定
+
+        // ややこしいので、ひとまず、フロント側の C# で実現する
+        
+        //let mis = bind.GetType().GetRuntimeMethods().ToList()
+        //for mib in mis do
+        //    let bindName = mib.Name
+        //    for mip in page.GetType().GetRuntimeMethods().ToList() do
+        //        if mib.Name = mip.Name then
+
+
+        // let btn = findName( page, "btnClickMe")
+        // bindMethod( page, bind, btn, "Click", "Button_Click" )
+
+
+    member this.BindMethod( page:obj, bind:obj, target:obj, eventName:string, methodName:string) =
+        bindMethod( page, bind, target, eventName, methodName )
 
         
